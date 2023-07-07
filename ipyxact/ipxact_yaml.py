@@ -55,6 +55,19 @@ busType:
     library: str
     name:    str
     version: str
+catalog:
+  MEMBERS:
+    description: str
+    vendor:  str
+    library: str
+    name:    str
+    version: str
+  CHILD:
+    - catalogs
+    - components
+catalogs:
+  CHILDREN:
+    - ipxactFile
 component:
   MEMBERS:
     description: str
@@ -68,6 +81,9 @@ component:
     - memoryMaps
     - model
     - parameters
+components:
+  CHILDREN:
+    - ipxactFile
 componentInstantiation:
   MEMBERS:
     name: str
@@ -137,6 +153,9 @@ fileSet:
 fileSets:
   CHILDREN:
     - fileSet
+ipxactFile:
+  MEMBERS:
+    name: str
 instantiations:
   CHILDREN:
     - componentInstantiation
