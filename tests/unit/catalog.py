@@ -1,6 +1,13 @@
 import unittest
 import io
-from ipyxact.ipyxact import Catalog
+import os
+import sys
+import xml.etree.ElementTree as ET
+
+import ipyxact.ipyxact
+
+sys.path.append(os.path.dirname(__file__))
+from XmlUtils import xml_compare
 
 data = {
     # example from https://github.com/kactus2/ipxactexamplelib: tut.fi/examples/MemoryDesign/1.0/MemoryDesign.1.0.xml
@@ -111,7 +118,7 @@ http://www.accellera.org/XMLSchema/IPXACT/1685-2014/index.xsd">
 class CatalogTests(unittest.TestCase):
 
     def test_catalog_catalogs_kactus2_MemoryDesign(self):
-        catalog = Catalog();
+        catalog = ipyxact.ipyxact.Catalog();
         catalog.load(io.StringIO(data['kactus2-MemoryDesign']));
         self.assertTrue( hasattr(catalog, 'catalogs') );
 
@@ -122,7 +129,7 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual( xactFile.name, '../../../cpu.structure/cpu_example.documents/1.0/cpu_example.documents.1.0.xml' );
 
     def test_catalog_catalogs_berndca(self):
-        catalog = Catalog();
+        catalog = ipyxact.ipyxact.Catalog();
         catalog.load(io.StringIO(data['berndca']));
         self.assertTrue( hasattr(catalog, 'catalogs') );
 
@@ -136,7 +143,7 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual( xactFile.name, 'https://github.com/VLSI-EDA/PoC' );
 
     def test_catalog_components_kactus2_spi_example(self):
-        catalog = Catalog();
+        catalog = ipyxact.ipyxact.Catalog();
         catalog.load(io.StringIO(data['kactus2-spi_example']));
         self.assertTrue( hasattr(catalog, 'components') );
 
@@ -148,6 +155,41 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual( [f.vlnv.library for f in components.ipxactFile], ['communication.template', 'communication.template', 'other.subsystem'] );
         self.assertEqual( [f.vlnv.name for f in components.ipxactFile], ['spi_master', 'spi_slave', 'spi_example'] );
         self.assertEqual( [f.vlnv.version for f in components.ipxactFile], ['1.0', '1.0', '1.0'] );
+
+    def test_create_catalog_catalogs(self):
+        xmlstring = '''<?xml version='1.0' encoding='UTF-8'?>
+<spirit:catalog xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1.5">
+<spirit:catalogs>
+    <spirit:ipxactFile>
+      <spirit:vlnv spirit:name="my_name" spirit:library="my_lib" spirit:vendor="my_vendor" spirit:version="1.1" />
+      <spirit:name>../some/path</spirit:name>
+    </spirit:ipxactFile>
+  </spirit:catalogs>
+</spirit:catalog>'''
+        
+        catalog = ipyxact.ipyxact.Catalog();
+        
+        catalogs = ipyxact.ipyxact.Catalogs();
+        catalog.catalogs = catalogs;
+        
+        vlnv = ipyxact.ipyxact.Vlnv();
+        vlnv.vendor = 'my_vendor'
+        vlnv.version = '1.1'
+        vlnv.name = 'my_name'
+        vlnv.library = 'my_lib'
+        
+        ipxactFile = ipyxact.ipyxact.IpxactFile();
+        ipxactFile.name = '../some/path'
+        ipxactFile.vlnv = vlnv
+        
+        catalogs.ipxactFile.append( ipxactFile );
+        
+        myout = io.StringIO();    
+        catalog.write(myout,indent='  ')
+        
+        expected = ET.fromstring(xmlstring)
+        actual = ET.fromstring(myout.getvalue())
+        self.assertTrue( xml_compare(expected, actual, None) )
 
 def main():
     unittest.main(verbosity=2, )
