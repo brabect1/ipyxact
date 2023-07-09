@@ -186,14 +186,40 @@ class IpxactItem(object):
                 subel = ET.SubElement(root, S+c)
                 tmp._write(subel, S)
 
-    def write(self, f):
+    # https://stackoverflow.com/a/65808327
+    def _xml_pretty_print(current, indent='\t', parent=None, index=-1, depth=0):
+        for i, node in enumerate(current):
+            IpxactItem._xml_pretty_print(node, indent, current, i, depth + 1)
+        if parent is not None:
+            if index == 0:
+                parent.text = '\n' + (indent * depth)
+            else:
+                parent[index - 1].tail = '\n' + (indent * depth)
+            if index == len(parent) - 1:
+                current.tail = '\n' + (indent * (depth - 1))
+
+    def write(self, f, indent=None):
         ET.register_namespace(self.nsmap[self.nsversion][0], self.nsmap[self.nsversion][1])
         S = '{%s}' % self.nsmap[self.nsversion][1]
         root = ET.Element(S+self._tag)
         self._write(root, S)
 
+        if indent is not None:
+            IpxactItem._xml_pretty_print(root,indent)
+
         et = ET.ElementTree(root)
         et.write(f, xml_declaration=True, encoding=UNICODE)
+
+    def tostring(self, indent=None):
+        ET.register_namespace(self.nsmap[self.nsversion][0], self.nsmap[self.nsversion][1])
+        S = '{%s}' % self.nsmap[self.nsversion][1]
+        root = ET.Element(S+self._tag)
+        self._write(root, S)
+
+        if indent is not None:
+            IpxactItem._xml_pretty_print(root,indent)
+
+        return ET.tostring(root, encoding=UNICODE)
 
 def _generate_classes(j):
     for tag, _items in j.items():
