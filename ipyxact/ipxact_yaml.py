@@ -156,6 +156,8 @@ fileSets:
 ipxactFile:
   MEMBERS:
     name: str
+  CHILD:
+    - vlnv
 instantiations:
   CHILDREN:
     - componentInstantiation
@@ -256,6 +258,12 @@ view:
 views:
   CHILDREN:
     - view
+vlnv:
+  ATTRIBS:
+    vendor: str
+    library: str
+    name: str
+    version: str
 wire:
   MEMBERS:
     direction: str

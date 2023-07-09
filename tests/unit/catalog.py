@@ -144,6 +144,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual( len(list(components.ipxactFile)), 3);
 
         self.assertEqual( [f.name for f in components.ipxactFile], ['../../../communication.template/spi_master/1.0/spi_master.1.0.xml', '../../../communication.template/spi_slave/1.0/spi_slave.1.0.xml', '../../../other.subsystem/spi_example/1.0/spi_example.1.0.xml'] );
+        self.assertEqual( [f.vlnv.vendor for f in components.ipxactFile], ['tut.fi', 'tut.fi', 'tut.fi'] );
+        self.assertEqual( [f.vlnv.library for f in components.ipxactFile], ['communication.template', 'communication.template', 'other.subsystem'] );
+        self.assertEqual( [f.vlnv.name for f in components.ipxactFile], ['spi_master', 'spi_slave', 'spi_example'] );
+        self.assertEqual( [f.vlnv.version for f in components.ipxactFile], ['1.0', '1.0', '1.0'] );
 
 def main():
     unittest.main(verbosity=2, )
